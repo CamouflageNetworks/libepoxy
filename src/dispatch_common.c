@@ -176,8 +176,9 @@
 #if defined(__APPLE__)
 #define GLX_LIB "/opt/X11/lib/libGL.1.dylib"
 #define OPENGL_LIB "/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL"
-#define GLES1_LIB "libGLESv1_CM.so"
-#define GLES2_LIB "libGLESv2.so"
+#define EGL_LIB "libEGL.dylib"
+#define GLES1_LIB "libGLESv1_CM.dylib"
+#define GLES2_LIB "libGLESv2.dylib"
 #elif defined(__ANDROID__)
 #define GLX_LIB "libGLESv2.so"
 #define EGL_LIB "libEGL.so"
@@ -868,6 +869,10 @@ epoxy_get_proc_address(const char *name)
 #if defined(_WIN32)
     return wglGetProcAddress(name);
 #elif defined(__APPLE__)
+#if PLATFORM_HAS_EGL
+    if (eglGetCurrentContext() != EGL_NO_CONTEXT)
+        return eglGetProcAddress(name);
+#endif
     return epoxy_gl_dlsym(name);
 #elif PLATFORM_HAS_GLX
     if (epoxy_current_context_is_glx())
